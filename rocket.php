@@ -151,16 +151,15 @@ function softtech_rocket_plugin_activation() {
             global $woocommerce;
             $rocket_charge = ( $this->rocket_charge == 'yes' ) ? esc_html__( ' Also note that 1.8% Rocket "SEND MONEY" cost will be added with net price. Total amount you need to send us at', "stb" ) . ' ' . get_woocommerce_currency_symbol() . $woocommerce->cart->total : '';
             echo wpautop( wptexturize( esc_html__( $this->description, "stb" ) ) . $rocket_charge );
-            echo wpautop( wptexturize( "Rocket " . $this->number_type . " Number : " . $this->rocket_number ) );
 
-            if ( $this->description ) {
-                echo wpautop( wp_kses_post( $this->description ) );
-            }
-
+            // Display Rocket QR Code
             $qr_code_url = get_option( 'roket_rq_code_image' );
             if ( $qr_code_url ) {
                 echo '<img src="' . esc_url( $qr_code_url ) . '" class="rocket-qr-code-image" alt="Rocket QR Code">';
             }
+
+            // Display Rocket Number
+            echo wpautop( wptexturize( "Rocket " . $this->number_type . " Number : " . $this->rocket_number ) );
 
             ?>
 

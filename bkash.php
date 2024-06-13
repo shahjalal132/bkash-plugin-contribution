@@ -151,15 +151,15 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 global $woocommerce;
                 $bkash_charge = ( $this->bkash_charge == 'yes' ) ? esc_html__( ' Also note that 1.85% bKash "SEND MONEY" cost will be added with net price. Total amount you need to send us at', 'stb' ) . ' ' . get_woocommerce_currency_symbol() . $woocommerce->cart->total : '';
                 echo wpautop( wptexturize( esc_html__( $this->description, 'stb' ) . $bkash_charge ) );
-                echo wpautop( wptexturize( "bKash " . $this->number_type . " Number : " . $this->bkash_number ) );
 
-                // Get the uploaded QR code URL
+                // Display bKash QR Code
                 $qr_code_url = $this->get_option( 'bkash_upload_file_url' );
-
-                // Display the QR code image
                 if ( !empty( $qr_code_url ) ) {
                     echo '<img src="' . esc_url( $qr_code_url ) . '" class="bkash-qr-code-image" alt="bKash QR Code">';
                 }
+
+                // Display bKash Number
+                echo wpautop( wptexturize( "bKash " . $this->number_type . " Number : " . $this->bkash_number ) );
 
                 ?>
                 <table border="0">
