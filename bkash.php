@@ -50,29 +50,51 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
                 add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'softtech_bkash_thankyou_page' ) );
                 add_action( 'woocommerce_email_before_order_table', array( $this, 'softtech_bkash_email_instructions' ), 10, 3 );
+                add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_upload_file' ) );
             }
 
+            public function process_upload_file() {
+                if ( isset( $_FILES['woocommerce_softtech_bkash_upload_file'] ) && !empty( $_FILES['woocommerce_softtech_bkash_upload_file']['name'] ) ) {
+
+                    if ( !function_exists( 'wp_handle_upload' ) ) {
+                        require_once ( ABSPATH . 'wp-admin/includes/file.php' );
+                    }
+
+                    $uploaded_file = $_FILES['woocommerce_softtech_bkash_upload_file'];
+
+                    // Upload the file
+                    $upload = wp_handle_upload( $uploaded_file, array( 'test_form' => false ) );
+
+                    if ( isset( $upload['url'] ) && !isset( $upload['error'] ) ) {
+                        // Save the URL in WooCommerce settings
+                        $this->update_option( 'bkash_upload_file_url', $upload['url'] );
+                    } else {
+                        // Handle errors
+                        WC_Admin_Settings::add_error( esc_html__( 'Error uploading file: ', 'stb' ) . $upload['error'] );
+                    }
+                }
+            }
 
             public function softtech_bkash_options_fields() {
                 $this->form_fields = array(
-                    'enabled'      => array(
+                    'enabled'               => array(
                         'title'   => esc_html__( 'Enable/Disable', "stb" ),
                         'type'    => 'checkbox',
                         'label'   => esc_html__( 'bKash Payment', "stb" ),
                         'default' => 'yes',
                     ),
-                    'title'        => array(
+                    'title'                 => array(
                         'title'   => esc_html__( 'Title', "stb" ),
                         'type'    => 'text',
                         'default' => esc_html__( 'bKash', "stb" ),
                     ),
-                    'description'  => array(
+                    'description'           => array(
                         'title'    => esc_html__( 'Description', "stb" ),
                         'type'     => 'textarea',
                         'default'  => esc_html__( 'Please complete your bKash payment at first, then fill up the form below.', "stb" ),
                         'desc_tip' => true,
                     ),
-                    'order_status' => array(
+                    'order_status'          => array(
                         'title'       => esc_html__( 'Order Status', "stb" ),
                         'type'        => 'select',
                         'class'       => 'wc-enhanced-select',
@@ -81,13 +103,13 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                         'desc_tip'    => true,
                         'options'     => wc_get_order_statuses(),
                     ),
-                    'bkash_number' => array(
+                    'bkash_number'          => array(
                         'title'       => esc_html__( 'bKash Number', "stb" ),
                         'description' => esc_html__( 'Add a bKash mobile no which will be shown in checkout page', "stb" ),
                         'type'        => 'text',
                         'desc_tip'    => true,
                     ),
-                    'number_type'  => array(
+                    'number_type'           => array(
                         'title'       => esc_html__( 'Agent/Personal', "stb" ),
                         'type'        => 'select',
                         'class'       => 'wc-enhanced-select',
@@ -98,7 +120,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                         ),
                         'desc_tip'    => true,
                     ),
-                    'bkash_charge' => array(
+                    'bkash_charge'          => array(
                         'title'       => esc_html__( 'Enable bKash Charge', "stb" ),
                         'type'        => 'checkbox',
                         'label'       => esc_html__( 'Add 1.85% bKash "Send Money" charge to net price', "stb" ),
@@ -106,46 +128,55 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                         'default'     => 'no',
                         'desc_tip'    => true,
                     ),
-                    'instructions' => array(
+                    'instructions'          => array(
                         'title'       => esc_html__( 'Instructions', "stb" ),
                         'type'        => 'textarea',
                         'description' => esc_html__( 'Instructions that will be added to the thank you page and emails.', "stb" ),
                         'default'     => esc_html__( 'Thanks for purchasing through bKash. We will check and give you update as soon as possible.', "stb" ),
                         'desc_tip'    => true,
                     ),
-                    'upload_file'  => array(
+                    'upload_file'           => array(
                         'title'       => esc_html__( 'Upload QR Code Image', "stb" ),
                         'type'        => 'file',
                         'description' => esc_html__( 'Upload QR code image', "stb" ),
                         'desc_tip'    => true,
+                    ),
+                    'bkash_upload_file_url' => array(
+                        'type' => 'hidden',
                     ),
                 );
             }
 
 
             public function payment_fields() {
-
                 global $woocommerce;
-                $bkash_charge = ( $this->bkash_charge == 'yes' ) ? esc_html__( ' Also note that 1.85% bKash "SEND MONEY" cost will be added with net price. Total amount you need to send us at', "stb" ) . ' ' . get_woocommerce_currency_symbol() . $woocommerce->cart->total : '';
-                echo wpautop( wptexturize( esc_html__( $this->description, "stb" ) ) . $bkash_charge );
+                $bkash_charge = ( $this->bkash_charge == 'yes' ) ? esc_html__( ' Also note that 1.85% bKash "SEND MONEY" cost will be added with net price. Total amount you need to send us at', 'stb' ) . ' ' . get_woocommerce_currency_symbol() . $woocommerce->cart->total : '';
+                echo wpautop( wptexturize( esc_html__( $this->description, 'stb' ) . $bkash_charge ) );
                 echo wpautop( wptexturize( "bKash " . $this->number_type . " Number : " . $this->bkash_number ) );
+
+                // Get the uploaded QR code URL
+                $qr_code_url = $this->get_option( 'bkash_upload_file_url' );
+
+                // Display the QR code image
+                if ( !empty( $qr_code_url ) ) {
+                    echo '<img src="' . esc_url( $qr_code_url ) . '" class="bkash-qr-code-image" alt="bKash QR Code">';
+                }
 
                 ?>
                 <table border="0">
                     <tr>
-                        <td><label for="bkash_number"><?php esc_html_e( 'bKash Number', "stb" ); ?></label></td>
+                        <td><label for="bkash_number"><?php esc_html_e( 'bKash Number', 'stb' ); ?></label></td>
                         <td><input class="widefat" type="text" name="bkash_number" id="bkash_number" placeholder="017XXXXXXXX"></td>
                     </tr>
                     <tr>
-                        <td><label for="bkash_transaction_id"><?php esc_html_e( 'bKash Transaction ID', "stb" ); ?></label></td>
+                        <td><label for="bkash_transaction_id"><?php esc_html_e( 'bKash Transaction ID', 'stb' ); ?></label></td>
                         <td><input class="widefat" type="text" name="bkash_transaction_id" id="bkash_transaction_id"
                                 placeholder="8N7A6D5EE7M"></td>
                     </tr>
                 </table>
-
-
                 <?php
             }
+
 
 
             public function process_payment( $order_id ) {

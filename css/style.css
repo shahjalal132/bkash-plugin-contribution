@@ -1,4 +1,4 @@
-.widefat{
+.widefat {
   width: 100%;
   margin: 0;
   clear: both;
@@ -6,6 +6,11 @@
 }
 
 .woocommerce-checkout #payment ul.payment_methods li img {
-    height: 25px;
-    width: auto;
+  height: 25px;
+  width: auto;
+}
+
+.woocommerce-checkout #payment ul.payment_methods li img.bkash-qr-code-image {
+  height: 300px !important;
+  width: auto;
 }
