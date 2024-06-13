@@ -10,7 +10,8 @@
   width: auto;
 }
 
-.woocommerce-checkout #payment ul.payment_methods li img.bkash-qr-code-image {
+.woocommerce-checkout #payment ul.payment_methods li img.bkash-qr-code-image,
+.woocommerce-checkout #payment ul.payment_methods li img.rocket-qr-code-image {
   height: 300px !important;
   width: auto;
 }

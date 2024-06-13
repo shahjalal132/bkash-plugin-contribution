@@ -50,10 +50,10 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
                 add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'softtech_bkash_thankyou_page' ) );
                 add_action( 'woocommerce_email_before_order_table', array( $this, 'softtech_bkash_email_instructions' ), 10, 3 );
-                add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_upload_file' ) );
+                add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'bkash_process_upload_file' ) );
             }
 
-            public function process_upload_file() {
+            public function bkash_process_upload_file() {
                 if ( isset( $_FILES['woocommerce_softtech_bkash_upload_file'] ) && !empty( $_FILES['woocommerce_softtech_bkash_upload_file']['name'] ) ) {
 
                     if ( !function_exists( 'wp_handle_upload' ) ) {
@@ -138,8 +138,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                     'upload_file'           => array(
                         'title'       => esc_html__( 'Upload QR Code Image', "stb" ),
                         'type'        => 'file',
-                        'description' => esc_html__( 'Upload QR code image', "stb" ),
-                        'desc_tip'    => true,
+                        'description' => esc_html__( 'Upload your bKash QR Code image here.', "stb" ),
                     ),
                     'bkash_upload_file_url' => array(
                         'type' => 'hidden',
